@@ -11,7 +11,12 @@ import android.widget.TextView;
 import java.util.UUID;
 
 import com.jiahaoliuliu.avoidduplicatedinstallations.Preferences.StringId;
+import com.parse.ParseException;
 import com.parse.ParseInstallation;
+import com.parse.ParsePush;
+import com.parse.SendCallback;
+
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
     private volatile UUID mUuid;
     private Object lock = new Object();
     private Preferences mPreferences;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
         installation.put(PARSE_INSTALLATION_TABLE_COLUMN_UNIQUE_ID, getUuid().toString());
         installation.saveInBackground();
+
+        // Send invisible push notification
+        sendInvisiblePushNotification();
     }
 
     public UUID getUuid() {
@@ -114,5 +121,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private void sendInvisiblePushNotification() {
+        ParsePush parsePush = new ParsePush();
+        parsePush.setChannel("");
+        parsePush.setData(new JSONObject());
+        parsePush.sendInBackground(new SendCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    Log.v(TAG, "Push notification sent correctly");
+                } else {
+                    Log.e(TAG, "Error sending push notification " + e.getCode(), e);
+                }
+            }
+        });
     }
 }
