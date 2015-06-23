@@ -38,4 +38,4 @@ Thumbs.db
 build/
 
 # Internal keys
-app/src/main/java/com/jiahaoliuliu/parsepushsegmentedbychannels/APIKeys.java
+app/src/main/java/com/jiahaoliuliu/avoidduplicatedinstallations/APIKeys.java
