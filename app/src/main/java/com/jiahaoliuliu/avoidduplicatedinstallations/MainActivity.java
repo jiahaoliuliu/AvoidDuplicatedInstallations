@@ -11,10 +11,12 @@ import android.widget.TextView;
 import java.util.UUID;
 
 import com.jiahaoliuliu.avoidduplicatedinstallations.Preferences.StringId;
+import com.parse.ParseInstallation;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    private static final String PARSE_INSTALLATION_TABLE_COLUMN_UNIQUE_ID = "uniqueId";
 
     private Context mContext;
 
@@ -39,7 +41,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Set the values
         mUuidTextView.setText(getUuid().toString());
-        Log.v(TAG, "The uuid is " + mUuidTextView.getText().toString());
+        Log.v(TAG, "The uuid is " + getUuid().toString());
+
+        // Update the installation id
+        ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+        installation.put(PARSE_INSTALLATION_TABLE_COLUMN_UNIQUE_ID, getUuid().toString());
+        installation.saveInBackground();
     }
 
     public UUID getUuid() {
@@ -108,5 +115,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
 }
