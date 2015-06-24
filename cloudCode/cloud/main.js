@@ -4,12 +4,6 @@
 // the Universal Unique ID of each device.
 Parse.Cloud.beforeSave(Parse.Installation, function(request, response) {
     // If it is an update, then don't do anything
-    if (!request.object.isNew()) {
-        console.log("It is not going to create a new entry. Not doing anything");
-        response.success();
-        return;
-    }
-
     Parse.Cloud.useMasterKey();
     var query = new Parse.Query(Parse.Installation);
     console.log("The unique id to check is " + request.object.get("uniqueId"));
@@ -22,14 +16,17 @@ Parse.Cloud.beforeSave(Parse.Installation, function(request, response) {
     // } else {
     //     console.log("The current object does not exists " + request.object.id);
     // }
-    query.first().then(function(duplicate) {
-        console.log("Duplicate is " + duplicate);
-        if (typeof duplicate === "undefined") {
-            console.log("No duplicated installations, New installation");
-            response.success();
-        } else {
-            console.log("Duplicated installation is detected. The id is " + duplicate.id
-                + " and the last modification time is " + duplicate.updatedAt);
+    query.find().then(function(duplicates) {
+        console.log("Duplicate is " + duplicates);
+        for (var i = 0; i < duplicates.length; i++) {
+            console.log("The duplicated has id " + duplicates[i].id);
+        }
+        // if (typeof duplicate === "undefined") {
+        //     console.log("No duplicated installations, New installation");
+        //     response.success();
+        // } else {
+        //     console.log("Duplicated installation is detected. The id is " + duplicate.id
+        //         + " and the last modification time is " + duplicate.updatedAt);
             // duplicate.destroy().then(function(duplicate){
             //     console.log("Successfully deleted duplicate");
             //     response.error();
@@ -39,10 +36,9 @@ Parse.Cloud.beforeSave(Parse.Installation, function(request, response) {
             // });
 //            response.success();
             // Prevent the actual object being saved if a duplication already exists
-            response.error();
-        }
+            response.success();
     }, function(error) {
        console.warn(error.code + error.message);
-       response.error();
+       response.success();
     });
 });
