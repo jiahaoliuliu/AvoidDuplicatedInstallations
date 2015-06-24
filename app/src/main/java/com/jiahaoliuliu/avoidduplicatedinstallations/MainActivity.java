@@ -14,6 +14,7 @@ import com.jiahaoliuliu.avoidduplicatedinstallations.Preferences.StringId;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParsePush;
+import com.parse.SaveCallback;
 import com.parse.SendCallback;
 
 import org.json.JSONObject;
@@ -50,10 +51,19 @@ public class MainActivity extends AppCompatActivity {
         // Update the installation id
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
         installation.put(PARSE_INSTALLATION_TABLE_COLUMN_UNIQUE_ID, getUuid().toString());
-        installation.saveInBackground();
+        installation.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    Log.v(TAG, "Installation updated correctly");
+                } else {
+                    Log.e(TAG, "There was some problem related with the installation", e);
+                }
 
-        // Send invisible push notification
-        sendInvisiblePushNotification();
+                // Send invisible push notification after the
+                //sendInvisiblePushNotification();
+            }
+        });
     }
 
     public UUID getUuid() {
