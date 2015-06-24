@@ -11,10 +11,18 @@ import android.widget.TextView;
 import java.util.UUID;
 
 import com.jiahaoliuliu.avoidduplicatedinstallations.Preferences.StringId;
+import com.parse.ParseException;
+import com.parse.ParseInstallation;
+import com.parse.ParsePush;
+import com.parse.SaveCallback;
+import com.parse.SendCallback;
+
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    private static final String PARSE_INSTALLATION_TABLE_COLUMN_UNIQUE_ID = "uniqueId";
 
     private Context mContext;
 
@@ -24,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
     private volatile UUID mUuid;
     private Object lock = new Object();
     private Preferences mPreferences;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +46,24 @@ public class MainActivity extends AppCompatActivity {
 
         // Set the values
         mUuidTextView.setText(getUuid().toString());
-        Log.v(TAG, "The uuid is " + mUuidTextView.getText().toString());
+        Log.v(TAG, "The uuid is " + getUuid().toString());
+
+        // Update the installation id
+        ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+        installation.put(PARSE_INSTALLATION_TABLE_COLUMN_UNIQUE_ID, getUuid().toString());
+        installation.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    Log.v(TAG, "Installation updated correctly");
+                } else {
+                    Log.e(TAG, "There was some problem related with the installation", e);
+                }
+
+                // Send invisible push notification after the
+                //sendInvisiblePushNotification();
+            }
+        });
     }
 
     public UUID getUuid() {
@@ -109,4 +133,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void sendInvisiblePushNotification() {
+        ParsePush parsePush = new ParsePush();
+        parsePush.setChannel("");
+        parsePush.setData(new JSONObject());
+        parsePush.sendInBackground(new SendCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    Log.v(TAG, "Push notification sent correctly");
+                } else {
+                    Log.e(TAG, "Error sending push notification " + e.getCode(), e);
+                }
+            }
+        });
+    }
 }
