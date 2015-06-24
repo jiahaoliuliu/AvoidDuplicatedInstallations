@@ -26,5 +26,26 @@ dependencies {
     // Parse
     compile 'com.parse.bolts:bolts-android:1.+'
     compile fileTree(dir: 'libs', include: 'Parse-*.jar')
-    compile 'com.google.android.gms:play-services:7.3.+'
+    compile ('com.google.android.gms:play-services:7.3.+') {
+        exclude group: "com/google/ads/**"
+        exclude group: "com/google/android/gms/ads/**"
+        exclude group: "com/google/android/gms/analytics/**"
+        exclude group: "com/google/android/gms/appindexing/**"
+        exclude group: "com/google/android/gms/appinvite/**"
+        exclude group: "com/google/android/gms/appstate/**"
+        exclude group: "com/google/android/gms/cast/**"
+        exclude group: "com/google/android/gms/drive/**"
+        exclude group: "com/google/android/gms/fitness/**"
+        exclude group: "com/google/android/gms/games/**"
+        exclude group: "com/google/android/gms/identity/**"
+        exclude group: "com/google/android/gms/location/**"
+        exclude group: "com/google/android/gms/maps/**"
+        exclude group: "com/google/android/gms/nearby/**"
+        exclude group: "com/google/android/gms/panorama/**"
+        exclude group: "com/google/android/gms/plus/**"
+        exclude group: "com/google/android/gms/safetynet/**"
+        exclude group: "com/google/android/gms/wallet/**"
+        exclude group: "com/google/android/gms/wearable/**"
+
+    }
 }
