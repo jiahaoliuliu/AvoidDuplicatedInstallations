@@ -15,17 +15,20 @@ Parse.Cloud.beforeSave(Parse.Installation, function(request, response) {
             response.success();
         } else {
             console.log("Duplicated installation is detected... Trying to delete " + duplicate.id);
-            duplicate.destroy().then(function(duplicate){
-                console.log("Successfully deleted duplicate");
-                response.success();
-            }, function() {
-                console.log(error.code + " " + error.message);
-                response.success();
-            }); 
-            response.success();
+            console.log("Duplicated last modification time " + duplicate.updatedAt);            
+            // duplicate.destroy().then(function(duplicate){
+            //     console.log("Successfully deleted duplicate");
+            //     response.success();
+            // }, function() {
+            //     console.log(error.code + " " + error.message);
+            //     response.success();
+            // });
+//            response.success();
+            // Prevent the actual object being saved if a duplication already exists
+            response.error();
         }
     }, function(error) {
        console.warn(error.code + error.message);
-       response.success();
+       response.error();
     });
 });

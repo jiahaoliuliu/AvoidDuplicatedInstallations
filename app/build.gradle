@@ -46,6 +46,5 @@ dependencies {
         exclude group: "com/google/android/gms/safetynet/**"
         exclude group: "com/google/android/gms/wallet/**"
         exclude group: "com/google/android/gms/wearable/**"
-
     }
 }
