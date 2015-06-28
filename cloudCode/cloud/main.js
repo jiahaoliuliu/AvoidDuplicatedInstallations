@@ -7,14 +7,17 @@ Parse.Cloud.beforeSave(Parse.Installation, function(request, response) {
     var channelIdKey = "channels";
     var installationIdKey = "installationId";
 
-    if (!request.object.has(uniqueIdKey)) {
-        console.log("The object does not have the unique Id");
-        response.success();
-        return;
+    var dirtyKeys = request.object.dirtyKeys();
+    for (var i =0; i < dirtyKeys.length; i++) {
+        console.log("Field to be updated " + dirtyKeys[i]);
+        if (dirtyKeys[i] !== uniqueIdKey) {
+            console.log("Not updating unique id");
+            response.success();
+            return;
+        }
     }
 
     console.log("The object contains the uniqueId " + request.object.get(uniqueIdKey));
-
     // If it is an update, then don't do anything
     Parse.Cloud.useMasterKey();
     var query = new Parse.Query(Parse.Installation);
@@ -34,99 +37,29 @@ Parse.Cloud.beforeSave(Parse.Installation, function(request, response) {
             console.log("No duplicated installations, New installation");
             response.success();
         } else {
-            for (var i = 0; i < duplicates.length; i++) {
-                console.log("Duplicated intallation found with id " + duplicates[i].id);
-                var possibleDuplication = duplicates[i];
-                var originalChannels=possibleDuplication.get(channelIdKey);
+            var duplicatedLength = duplicates.length;
+            for (var j = 0; j < duplicatedLength; j++) {
+                console.log("Duplicated intallation found with id " + duplicates[j].id);
+                var duplicatedItem = duplicates[j];
+                var originalChannels=duplicatedItem.get(channelIdKey);
                 var channelsLength = originalChannels.length;
-                for (var i = 0; i < channelsLength; i++) {
-                    console.log("Adding the channel " + originalChannels[i]);
-                    request.object.addUnique(channelIdKey, originalChannels[i]);
+                for (var k = 0; k < channelsLength; k++) {
+                    console.log("Adding the channel " + originalChannels[k]);
+                    request.object.addUnique(channelIdKey, originalChannels[k]);
                 }
 
-                // possibleDuplication.destroy().then(
-                //     function(duplicate){
-                //         console.log("Successfully deleted duplicate");
-                //         response.success();
-                //     }, function() {
-                //         console.log(error.code + " " + error.message);
-                //         response.success();
-                //     }
-                // );
+                console.log("Removing the duplicated item");
+                duplicatedItem.destroy().then(
+                    function(duplicate){
+                        console.log("Successfully deleted duplicate");
+                    }, function(error) {
+                        console.log(error.code + " " + error.message);
+                    }
+                );
             }
+            console.log("Sending success message");
             response.success();
         }
-        // } else if (duplicates.length == 1) {
-        //     console.log("The length of the duplicated installations is 1");
-        //     var possibleDuplication = duplicates[0];
-        //     // Because parse has some problem to distinguishi the existing row and the
-        //     // row that is going to be added, check if the row gotten is the actual one
-        //     if (possibleDuplication.id == request.object.id) {
-        //         console.log("The id of the duplicated element is the same as the actual element,everything is ok");
-        //         response.success();
-        //     } else {
-        //         console.log("The existence object is not the actual element. remove the actual element");
-        //         var originalChannels=possibleDuplication.get(channelIdKey);
-        //         var channelsLength = originalChannels.length;
-        //         for (var i = 0; i < channelsLength; i++) {
-        //             console.log("Adding the channel " + originalChannels[i]);
-        //             request.object.addUnique(channelIdKey, originalChannels[i]);
-        //         }
-
-        //         possibleDuplication.destroy().then(
-        //             function(duplicate){
-        //                 console.log("Successfully deleted duplicate");
-        //                 response.success();
-        //             }, function() {
-        //                 console.log(error.code + " " + error.message);
-        //                 response.success();
-        //             }
-        //         );
-        //     }
-        // } else {
-        //     console.log("The length of the duplicated installations is not 1");
-        //     var positionToBeKept = 0;          
-        //     for (var i = 0; i < duplicates.length; i++) {
-        //         console.log("The duplicated has id " + duplicates[i].id);
-        //         // If it is the position to be kept
-        //         if (i == positionToBeKept) {
-        //             console.log("Position is the position of the element to be kept. Checking if it is the element to be saved.");
-        //             if (duplicates[i].id == request.object.id) {
-        //                 positionToBeKept++;
-        //                 console.log("The duplicated object is the actual element to be saved. Removing the actual element");
-        //                 request.object.destroy().then(
-        //                     function(duplicate){
-        //                         console.log("Successfully deleted duplicate");
-        //                         response.success();
-        //                     }, function() {
-        //                         console.log(error.code + " " + error.message);
-        //                         response.success();
-        //                     }
-        //                 );
-        //             }
-        //         // If it is not the position to be kept, remove it
-        //         } else {
-        //             console.log("It is not the element to be kept. Removing it");
-
-        //             // Keep the channels
-        //             var originalChannels=duplicates[i].get(channelIdKey);
-        //             var channelsLength = originalChannels.length;
-        //             for (var i = 0; i < channelsLength; i++) {
-        //                 console.log("Adding the channel " + originalChannels[i]);
-        //                 request.object.addUnique(channelIdKey, originalChannels[i]);
-        //             }
-
-        //             duplicates[i].destroy().then(
-        //                 function(duplicate){
-        //                     console.log("Successfully deleted duplicate of the position " + i);
-        //                 }, function() {
-        //                     console.log(error.code + " " + error.message);
-        //                 }
-        //             );
-        //         }
-        //     }
-        //     response.success();
-        // }
     }, function(error) {
        console.warn(error.code + error.message);
        // If there is any problem, keep the actual installation
