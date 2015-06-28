@@ -6,13 +6,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
-import java.util.UUID;
-
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParsePush;
-import com.parse.SendCallback;
+import com.parse.SaveCallback;
 
-import org.json.JSONObject;
+import java.util.Random;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
 
     // Views
     private TextView mUuidTextView;
+
+    // Others
+    private Random mRandom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,24 @@ public class MainActivity extends AppCompatActivity {
         // Set the values
         mUuidTextView.setText(getUuid().toString());
         Log.v(TAG, "The uuid is " + getUuid().toString());
+
+        // Testing the installation
+        Log.v(TAG, "Parse installation id " + ParseInstallation.getCurrentInstallation().getInstallationId());
+
+        // Subscribe to random channels
+        mRandom = new Random();
+        String randomChannelId = "A" + String.valueOf(mRandom.nextInt(10000));
+
+        ParsePush.subscribeInBackground(randomChannelId, new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    Log.v(TAG, "Device correctly subscribed to the channel");
+                } else {
+                    Log.v(TAG, "Error subscribing the device", e);
+                }
+            }
+        });
     }
 
     private UUID getUuid() {
