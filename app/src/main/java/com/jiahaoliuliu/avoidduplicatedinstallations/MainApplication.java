@@ -60,7 +60,7 @@ public class MainApplication extends Application {
                 }
 
                 // Send invisible push notification after the
-                sendInvisiblePushNotification();
+                //sendInvisiblePushNotification();
             }
         });
     }
