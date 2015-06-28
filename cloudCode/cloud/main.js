@@ -4,6 +4,7 @@
 // the Universal Unique ID of each device.
 Parse.Cloud.beforeSave(Parse.Installation, function(request, response) {
     var uniqueIdKey = "uniqueId";
+    var channelId = "channels"
 
     if (!request.object.has(uniqueIdKey)) {
         console.log("The object does not have the unique Id");
@@ -26,14 +27,22 @@ Parse.Cloud.beforeSave(Parse.Installation, function(request, response) {
             response.success();
         } else if (duplicates.length == 1) {
             console.log("The length of the duplicated installations is 1");
+            var possibleDuplication = duplicates[0];
             // Because parse has some problem to distinguishi the existing row and the
             // row that is going to be added, check if the row gotten is the actual one
-            if (duplicates[0].id == request.object.id) {
+            if (possibleDuplication.id == request.object.id) {
                 console.log("The id of the duplicated element is the same as the actual element,everything is ok");
                 response.success();
             } else {
                 console.log("The existence object is not the actual element. remove the actual element");
-                request.object.destroy().then(
+                var originalChannels=possibleDuplication.get(channelId);
+                var channelsLength = originalChannels.length;
+                for (var i = 0; i < channelsLength; i++) {
+                    console.log("Adding the channel " + originalChannels[i]);
+                    request.object.addUnique(channelId, originalChannels[i]);
+                }
+
+                possibleDuplication.destroy().then(
                     function(duplicate){
                         console.log("Successfully deleted duplicate");
                         response.success();
